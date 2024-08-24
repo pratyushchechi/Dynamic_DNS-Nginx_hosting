@@ -1,0 +1,99 @@
+Setup Instructions
+Step 1: Install Nginx on Ubuntu
+Update your package list and install Nginx:
+bash
+Copy code
+sudo apt update
+sudo apt install nginx
+
+Step 2: Set Up Dynamic DNS (DDNS)
+Create a No-IP Account: Sign up for a free account on No-IP.
+Create a Hostname: Set up a DDNS hostname (e.g., foxsite.ddns.net) that points to your server's public IP address.
+Verify DNS Resolution: Ensure that the hostname resolves correctly to your server’s IP:
+bash
+Copy code
+dig +short foxsite.ddns.net
+
+Step 3: Configure Nginx to Serve Your Website
+Create a Web Root Directory:
+bash
+Copy code
+sudo mkdir -p /var/www/foxsite.ddns.net
+
+Add Your Website Files:
+Place your index.html file or other website files in the web root directory. For example, if you have a custom website, you can upload your index.html and other assets (like CSS, JavaScript, images) to /var/www/foxsite.ddns.net.
+Command (example):
+bash
+Copy code
+sudo cp /path/to/your/index.html /var/www/foxsite.ddns.net/
+sudo cp -r /path/to/your/assets /var/www/foxsite.ddns.net/
+
+
+Explanation: Replace /path/to/your/ with the actual path to your website files on your local machine. The cp command copies these files to the web root directory where Nginx will serve them.
+Configure Nginx to Serve the Site:
+bash
+Copy code
+sudo nano /etc/nginx/sites-available/foxsite.ddns.net
+
+Add the following configuration:
+nginx
+Copy code
+server {
+    listen 80;
+    server_name foxsite.ddns.net www.foxsite.ddns.net;
+
+    root /var/www/foxsite.ddns.net;
+    index index.html;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}
+
+Enable the Nginx Site:
+bash
+Copy code
+sudo ln -s /etc/nginx/sites-available/foxsite.ddns.net /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl restart nginx
+
+Step 4: Handling the 403 Forbidden Error
+If you encounter a 403 Forbidden error, you may need to set the correct permissions for the web root directory:
+bash
+Copy code
+sudo chown -R www-data:www-data /var/www/foxsite.ddns.net
+sudo chmod -R 755 /var/www/foxsite.ddns.net
+
+Step 5: Obtain SSL Certificates with Certbot
+Install Certbot:
+bash
+Copy code
+sudo apt-get install certbot python3-certbot-nginx
+
+Obtain the SSL Certificate:
+bash
+Copy code
+sudo certbot --nginx -d foxsite.ddns.net -d www.foxsite.ddns.net
+
+If the www subdomain causes issues, ensure it is correctly configured in your DNS settings or only secure the main domain:
+bash
+Copy code
+sudo certbot --nginx -d foxsite.ddns.net
+
+Step 6: Accessing the Website by IP
+To allow access via your server's IP address, update the server_name directive in your Nginx configuration:
+nginx
+Copy code
+server_name foxsite.ddns.net www.foxsite.ddns.net your_server_ip;
+
+Step 7: Testing and Verification
+Access the Website:
+By DDNS: Open http://foxsite.ddns.net in your browser.
+By IP Address: Open http://your_server_ip in your browser.
+Verify HTTPS Access:
+Ensure that the site is accessible via HTTPS by visiting https://foxsite.ddns.net.
+
+Explanation:
+Adding Your Website Files: This part of the instructions explains how users can place their own index.html or other website files into the directory that Nginx serves. It also explains how they can use the cp command to copy their files into the correct location.
+This update will guide users on how to host their own custom websites on the server. Let me know if you need any more adjustments!
+
